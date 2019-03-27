@@ -1152,9 +1152,13 @@ class Consul(object):
                 data['WriteRequest'] = {'Token': token}
                 params.append(('token', token))
             if node_meta:
-                for nodemeta_name, nodemeta_value in node_meta.items():
-                    params.append(('node-meta', '{0}:{1}'.
-                                   format(nodemeta_name, nodemeta_value)))
+                # issue 222
+                # This is done so the API properly passes node_meta data to Consul. PR #222 did not fix this issue.
+                # Consul appears to want node_meta in the data body not params.
+                data['nodemeta'] = node_meta
+                # for nodemeta_name, nodemeta_value in node_meta.items():
+                #     params.append(('node-meta', '{0}:{1}'.
+                #                    format(nodemeta_name, nodemeta_value)))
             return self.agent.http.put(
                 CB.bool(),
                 '/v1/catalog/register',
