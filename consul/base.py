@@ -1411,6 +1411,59 @@ class Consul(object):
                 '/v1/catalog/node/%s' % node,
                 params=params)
 
+        def serviceMultipleTags(
+                self,
+                service,
+                index=None,
+                wait=None,
+                tags=[],
+                consistency=None,
+                dc=None,
+                near=None,
+                token=None,
+                node_meta=None):
+
+            """
+            add multiple tags test just !
+            :param service:
+            :param index:
+            :param wait:
+            :param tags:
+            :param consistency:
+            :param dc:
+            :param near:
+            :param token:
+            :param node_meta:
+            :return:
+            """
+            params = []
+            dc = dc or self.agent.dc
+            if dc:
+                params.append(('dc', dc))
+            if len(tags) > 0:
+                for tag in tags:
+                    params.append(('tag', tag))
+            if index:
+                params.append(('index', index))
+                if wait:
+                    params.append(('wait', wait))
+            if near:
+                params.append(('near', near))
+            token = token or self.agent.token
+            if token:
+                params.append(('token', token))
+            consistency = consistency or self.agent.consistency
+            if consistency in ('consistent', 'stale'):
+                params.append((consistency, '1'))
+            if node_meta:
+                for nodemeta_name, nodemeta_value in node_meta.items():
+                    params.append(('node-meta', '{0}:{1}'.
+                                   format(nodemeta_name, nodemeta_value)))
+            return self.agent.http.get(
+                CB.json(index=True),
+                '/v1/catalog/service/%s' % service,
+                params=params)
+
         def service(
                 self,
                 service,
